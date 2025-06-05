@@ -1,40 +1,61 @@
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>Painel Aviator</title>
   <style>
     body {
+      font-family: Arial, sans-serif;
       background: #111;
-      color: #0f0;
-      font-family: monospace;
-      padding: 10px;
+      color: #eee;
+      padding: 20px;
     }
-    #log {
-      max-height: 480px;
-      overflow-y: auto;
-    }
-    .mensagem {
-      margin-bottom: 10px;
-      padding: 5px;
+    #painelStats {
       background: #222;
-      border-left: 4px solid #0f0;
+      border-radius: 12px;
+      padding: 20px;
+      max-width: 400px;
+      margin: auto;
+    }
+    h3 {
+      margin-top: 0;
+    }
+    p {
+      margin: 6px 0;
     }
   </style>
 </head>
 <body>
-  <h2>📡 Painel Aviator</h2>
-  <div id="log"></div>
+
+  <div id="painelStats">
+    <h3>👾 Painel de Previsões</h3>
+    <p>Aguardando dados do bot...</p>
+  </div>
 
   <script>
-    const log = document.getElementById("log");
-
-    window.addEventListener("message", (event) => {
-      const msg = document.createElement("div");
-      msg.className = "mensagem";
-      msg.textContent = "🔔 " + event.data;
-      log.prepend(msg);
+    window.addEventListener('message', (event) => {
+      // Se quiser, pode validar event.origin aqui para segurança
+      const data = event.data;
+      if (data && data.tipo === 'previsao') {
+        const painel = document.getElementById('painelStats');
+        painel.innerHTML = `
+          <h3>📊 Previsão Recebida</h3>
+          <p><b>Padrão:</b> ${data.padrao}</p>
+          <p><b>Rodadas:</b> ${data.inicio} a ${data.fim}</p>
+          <p><b>Previsão:</b> ${data.previsao}</p>
+          <p><b>Meta final:</b> ${data.metaFinal}x</p>
+          <p><b>Entrada Ativa:</b> ${data.entradaAtiva ? 'Sim' : 'Não'}</p>
+          <p><small>Atualizado em: ${new Date(data.data).toLocaleString()}</small></p>
+        `;
+      } else if(data && data.tipo === 'resultado') {
+        const painel = document.getElementById('painelStats');
+        painel.innerHTML += `<p><b>Resultado:</b> ${data.resultado}x - ${data.status}</p>`;
+      } else if(data && data.tipo === 'gale') {
+        const painel = document.getElementById('painelStats');
+        painel.innerHTML += `<p>⚠️ Gale ${data.gale} - Resultado: ${data.resultado}x</p>`;
+      }
     });
   </script>
+
 </body>
 </html>
