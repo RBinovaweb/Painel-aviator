@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Painel Aviator</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #111;
+      color: #0f0;
+      padding: 15px;
+      box-sizing: border-box;
+    }
+
+    h1 {
+      font-size: 18px;
+      margin-bottom: 10px;
+      color: #fff;
+      text-align: center;
+    }
+
+    .mensagens {
+      max-height: 440px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column-reverse;
+    }
+
+    .mensagem {
+      background: #222;
+      border: 1px solid #0f0;
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 10px;
+      font-size: 14px;
+      white-space: pre-wrap;
+    }
+
+    .mensagem time {
+      display: block;
+      font-size: 12px;
+      color: #aaa;
+      margin-top: 5px;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+  <h1>📡 Alertas do Bot Aviator</h1>
+  <div class="mensagens" id="mensagens"></div>
+
+  <script>
+    const mensagensContainer = document.getElementById('mensagens');
+
+    function adicionarMensagem(texto) {
+      const msg = document.createElement('div');
+      msg.className = 'mensagem';
+
+      const hora = new Date().toLocaleTimeString();
+
+      msg.innerHTML = `${texto}<time>${hora}</time>`;
+      mensagensContainer.prepend(msg);
+    }
+
+    window.addEventListener('message', (event) => {
+      if (typeof event.data === 'string') {
+        adicionarMensagem(event.data);
+      }
+    });
+  </script>
+</body>
+</html>
