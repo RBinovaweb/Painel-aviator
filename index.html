@@ -2,60 +2,124 @@
 <html lang="pt-BR">
 <head>
   <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Painel Aviator</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #111;
-      color: #eee;
-      padding: 20px;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #121212;
+      color: #ddd;
+      margin: 0;
+      padding: 10px;
+      overflow-y: auto;
+      height: 100vh;
+      box-sizing: border-box;
     }
-    #painelStats {
+    h2 {
+      text-align: center;
+      margin-bottom: 15px;
+      color: #4caf50;
+    }
+    #logContainer {
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 10px;
+      border: 1px solid #333;
+      border-radius: 8px;
+      background: #1e1e1e;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+    .item {
+      margin-bottom: 8px;
+      padding: 8px;
+      border-radius: 6px;
       background: #222;
-      border-radius: 12px;
-      padding: 20px;
-      max-width: 400px;
-      margin: auto;
+      box-shadow: 0 0 6px #0f0a;
+      transition: background 0.3s ease;
     }
-    h3 {
-      margin-top: 0;
+    .item.previsao {
+      border-left: 5px solid #4caf50;
     }
-    p {
-      margin: 6px 0;
+    .item.resultado {
+      border-left: 5px solid #2196f3;
+    }
+    .item.vitoria {
+      border-left: 5px solid #00e676;
+    }
+    .item.derrota {
+      border-left: 5px solid #f44336;
+    }
+    .item.gale {
+      border-left: 5px solid #ff9800;
+    }
+    .time {
+      color: #888;
+      font-size: 12px;
+      margin-bottom: 4px;
     }
   </style>
 </head>
 <body>
-
-  <div id="painelStats">
-    <h3>👾 Painel de Previsões</h3>
-    <p>Aguardando dados do bot...</p>
-  </div>
+  <h2>Painel Aviator - Previsões & Resultados</h2>
+  <div id="logContainer"></div>
 
   <script>
-    window.addEventListener('message', (event) => {
-      // Se quiser, pode validar event.origin aqui para segurança
-      const data = event.data;
-      if (data && data.tipo === 'previsao') {
-        const painel = document.getElementById('painelStats');
-        painel.innerHTML = `
-          <h3>📊 Previsão Recebida</h3>
-          <p><b>Padrão:</b> ${data.padrao}</p>
-          <p><b>Rodadas:</b> ${data.inicio} a ${data.fim}</p>
-          <p><b>Previsão:</b> ${data.previsao}</p>
-          <p><b>Meta final:</b> ${data.metaFinal}x</p>
-          <p><b>Entrada Ativa:</b> ${data.entradaAtiva ? 'Sim' : 'Não'}</p>
-          <p><small>Atualizado em: ${new Date(data.data).toLocaleString()}</small></p>
-        `;
-      } else if(data && data.tipo === 'resultado') {
-        const painel = document.getElementById('painelStats');
-        painel.innerHTML += `<p><b>Resultado:</b> ${data.resultado}x - ${data.status}</p>`;
-      } else if(data && data.tipo === 'gale') {
-        const painel = document.getElementById('painelStats');
-        painel.innerHTML += `<p>⚠️ Gale ${data.gale} - Resultado: ${data.resultado}x</p>`;
+    const logContainer = document.getElementById('logContainer');
+
+    function formatData(dataStr) {
+      const d = new Date(dataStr);
+      return d.toLocaleTimeString('pt-BR', { hour12: false });
+    }
+
+    function addLogItem(data) {
+      const div = document.createElement('div');
+      div.classList.add('item');
+
+      switch (data.tipo) {
+        case 'previsao':
+          div.classList.add('previsao');
+          div.innerHTML = `
+            <div class="time">${formatData(data.data)}</div>
+            <strong>🎯 Previsão Detectada</strong><br/>
+            Padrão: ${data.padrao}<br/>
+            Previsão: <b>${data.previsao}</b><br/>
+            Entrada ativa: ${data.entradaAtiva ? 'Sim' : 'Não'}
+          `;
+          break;
+        case 'resultado':
+          div.classList.add(data.status === 'Vitória' ? 'vitoria' : 'derrota');
+          div.innerHTML = `
+            <div class="time">${formatData(data.data)}</div>
+            <strong>📊 Resultado</strong><br/>
+            Resultado: ${data.resultado}x<br/>
+            Status: ${data.status}<br/>
+            Entrada ativa: ${data.entradaAtiva ? 'Sim' : 'Não'}
+          `;
+          break;
+        case 'gale':
+          div.classList.add('gale');
+          div.innerHTML = `
+            <div class="time">${formatData(data.data)}</div>
+            <strong>⚠️ Gale #${data.gale}</strong><br/>
+            Resultado: ${data.resultado}x
+          `;
+          break;
+        default:
+          div.textContent = JSON.stringify(data);
       }
+
+      logContainer.prepend(div);
+    }
+
+    window.addEventListener('message', (event) => {
+      // Para segurança, você pode validar o origin aqui, ex:
+      // if (event.origin !== 'https://seu-dominio.github.io') return;
+
+      const data = event.data;
+      if (!data || !data.tipo) return;
+      addLogItem(data);
     });
   </script>
-
 </body>
 </html>
